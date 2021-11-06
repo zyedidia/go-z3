@@ -37,4 +37,51 @@ See the [godoc](https://godoc.org/github.com/zyedidia/go-z3/z3).
 Example
 =======
 
-Coming soon...
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/zyedidia/go-z3/z3"
+)
+
+func main() {
+	ctx := z3.NewContext(nil)
+
+	s := z3.NewSolver(ctx)
+
+	z3int := ctx.IntSort()
+	x := ctx.Const("x", z3int).(z3.Int)
+	y := ctx.Const("y", z3int).(z3.Int)
+	z := ctx.Const("z", z3int).(z3.Int)
+
+	zero := ctx.FromInt(0, z3int).(z3.Int)
+
+	s.Assert(x.Add(y, z).GT(ctx.FromInt(4, z3int).(z3.Int)))
+	s.Assert(z.GT(zero))
+
+	s.Assert(x.Eq(y).Not())
+	s.Assert(y.Eq(z).Not())
+
+	s.Assert(x.Eq(zero).Not())
+	s.Assert(y.Eq(zero).Not())
+	s.Assert(z.Eq(zero).Not())
+
+	s.Assert(x.Add(y).Eq(ctx.FromInt(-3, z3int).(z3.Int)))
+
+	sat, err := s.Check()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if !sat {
+		log.Fatal("Unsolvable")
+	}
+
+	m := s.Model()
+	fmt.Printf("x: %v\n", m.Eval(x, true))
+	fmt.Printf("y: %v\n", m.Eval(y, true))
+	fmt.Printf("z: %v\n", m.Eval(z, true))
+}
+```
