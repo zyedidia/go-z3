@@ -1,6 +1,11 @@
 go-z3 provides Go bindings for
 the [Z3 SMT solver](https://github.com/Z3Prover/z3).
 
+This repository is a fork of
+[aclements/go-z3](https://github.com/aclements/go-z3) that makes some minor
+fixes so that the bindings work with a modern version of z3 (4.8.13 at the time
+of writing).
+
 Installation
 ============
 
@@ -18,13 +23,18 @@ export CGO_CFLAGS=-I$Z3PREFIX/include CGO_LDFLAGS=-L$Z3PREFIX/lib
 export LD_LIBRARY_PATH=$Z3PREFIX/lib
 ```
 
-Then download and build go-z3:
+Then add go-z3 to your project:
 
 ```sh
-go get -u github.com/aclements/go-z3/z3
+go get github.com/zyedidia/go-z3/z3
 ```
 
 Documentation
 =============
 
-See the [godoc](https://godoc.org/github.com/aclements/go-z3/z3).
+See the [godoc](https://godoc.org/github.com/zyedidia/go-z3/z3).
+
+Example
+=======
+
+Coming soon...
