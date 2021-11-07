@@ -11,7 +11,17 @@ Installation
 
 First, follow the instructions to
 [download and install](https://github.com/Z3Prover/z3/blob/master/README.md)
-the Z3 C library.
+the Z3 C library. Here is my recommended installation procedure:
+
+```
+git clone https://github.com/Z3Prover/z3
+cd z3
+mkdir build
+cd build
+cmake -G "Unix Makefiles" ../
+make -j4
+sudo make install
+```
 
 If you installed the C library to a non-default location (such as a
 directory under `$HOME`), set the following environment variables:
