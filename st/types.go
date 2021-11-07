@@ -4,8 +4,9 @@ package st
 
 import (
 	"fmt"
-	"github.com/zyedidia/go-z3/z3"
 	"math/big"
+
+	"github.com/zyedidia/go-z3/z3"
 )
 
 type sorts struct {
@@ -66,6 +67,30 @@ func (x Bool) String() string {
 // IsConcrete returns true if x is concrete.
 func (x Bool) IsConcrete() bool {
 	return x.S.Context() == nil
+}
+
+func (x Bool) ToInt() Int {
+	if x.IsConcrete() {
+		if x.C {
+			return Int{C: 1}
+		}
+		return Int{C: 0}
+	}
+	ctx := x.S.Context()
+	cache := getCache(ctx)
+	return Int{S: x.S.IfThenElse(ctx.FromInt(1, cache.sortInt), ctx.FromInt(0, cache.sortInt)).(z3.BV)}
+}
+
+func (x Bool) ToInt32() Int32 {
+	if x.IsConcrete() {
+		if x.C {
+			return Int32{C: 1}
+		}
+		return Int32{C: 0}
+	}
+	ctx := x.S.Context()
+	cache := getCache(ctx)
+	return Int32{S: x.S.IfThenElse(ctx.FromInt(1, cache.sortInt32), ctx.FromInt(0, cache.sortInt32)).(z3.BV)}
 }
 
 // Eval returns x's concrete value in model m.
