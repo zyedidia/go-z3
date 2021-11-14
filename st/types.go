@@ -93,6 +93,18 @@ func (x Bool) ToInt32() Int32 {
 	return Int32{S: x.S.IfThenElse(ctx.FromInt(1, cache.sortInt32), ctx.FromInt(0, cache.sortInt32)).(z3.BV)}
 }
 
+func (x Bool) ToUint32() Uint32 {
+	if x.IsConcrete() {
+		if x.C {
+			return Uint32{C: 1}
+		}
+		return Uint32{C: 0}
+	}
+	ctx := x.S.Context()
+	cache := getCache(ctx)
+	return Uint32{S: x.S.IfThenElse(ctx.FromInt(1, cache.sortUint32), ctx.FromInt(0, cache.sortUint32)).(z3.BV)}
+}
+
 // Eval returns x's concrete value in model m.
 // This also evaluates x with model completion.
 func (x Bool) Eval(m *z3.Model) bool {
@@ -1896,6 +1908,13 @@ func (x Int64) Not() Int64 {
 	return Int64{S: x.S.Not()}
 }
 
+func (x Int64) Upper32() Int32 {
+	if x.IsConcrete() {
+		return Int32{C: int32(x.C >> 32)}
+	}
+	return Int32{S: x.S.Extract(63, 32)}
+}
+
 func (x Int64) ToInt() Int {
 	if x.IsConcrete() {
 		return Int{C: int(x.C)}
@@ -3697,6 +3716,13 @@ func (x Uint64) Not() Uint64 {
 		return Uint64{C: ^x.C}
 	}
 	return Uint64{S: x.S.Not()}
+}
+
+func (x Uint64) Upper32() Int32 {
+	if x.IsConcrete() {
+		return Int32{C: int32(x.C >> 32)}
+	}
+	return Int32{S: x.S.Extract(63, 32)}
 }
 
 func (x Uint64) ToInt() Int {
