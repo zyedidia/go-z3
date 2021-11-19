@@ -4579,14 +4579,16 @@ func (a *ArrayInt32) Read(idx Uint32, solv *z3.Solver) (Int32, bool) {
 	}
 	// bounds check
 	solv.Push()
-	solv.Assert(sidx.S.SLT(a.ctx.FromInt(a.base, cache.sortUint32).(z3.BV)).Or(
-		sidx.S.SGE(a.ctx.FromInt(a.base+a.length, cache.sortUint32).(z3.BV)),
-	))
+	solv.Assert(sidx.S.SGE(a.ctx.FromInt(a.base, cache.sortUint32).(z3.BV)))
+	solv.Assert(sidx.S.SLT(a.ctx.FromInt(a.base+a.length, cache.sortUint32).(z3.BV)))
 	sat, err := solv.Check()
-	if sat && err == nil {
-		return Int32{}, false
+	if err != nil {
+		panic(err)
 	}
 	solv.Pop()
+	if !sat && err == nil {
+		return Int32{}, false
+	}
 	return Int32{S: a.mem.Select(sidx.S).(z3.BV)}, true
 }
 
@@ -4599,14 +4601,16 @@ func (a *ArrayInt32) Write(idx Uint32, val Int32, solv *z3.Solver) bool {
 	}
 	// bounds check
 	solv.Push()
-	solv.Assert(sidx.S.SLT(a.ctx.FromInt(a.base, cache.sortUint32).(z3.BV)).Or(
-		sidx.S.SGE(a.ctx.FromInt(a.base+a.length, cache.sortUint32).(z3.BV)),
-	))
+	solv.Assert(sidx.S.SGE(a.ctx.FromInt(a.base, cache.sortUint32).(z3.BV)))
+	solv.Assert(sidx.S.SLT(a.ctx.FromInt(a.base+a.length, cache.sortUint32).(z3.BV)))
 	sat, err := solv.Check()
-	if sat && err == nil {
-		return false
+	if err != nil {
+		panic(err)
 	}
 	solv.Pop()
+	if !sat && err == nil {
+		return false
+	}
 
 	sval := val
 	if val.IsConcrete() {
