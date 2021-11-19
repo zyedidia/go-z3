@@ -4525,3 +4525,50 @@ func (x Real) Neg() Real {
 	}
 	return Real{S: x.S.Neg()}
 }
+
+type ArrayInt32 struct {
+	length int
+	ctx    *z3.Context
+	mem    z3.Array
+}
+
+func NewArrayInt32(ctx *z3.Context, name string, length int) *ArrayInt32 {
+	cache := getCache(ctx)
+	arr32 := ctx.ArraySort(cache.sortInt32, cache.sortInt32)
+	return &ArrayInt32{
+		ctx:    ctx,
+		length: length,
+		mem:    ctx.FreshConst(name, arr32).(z3.Array),
+	}
+}
+
+func (a *ArrayInt32) Read(idx Int32, solv *z3.Solver) Int32 {
+	cache := getCache(a.ctx)
+	sidx := idx
+	if idx.IsConcrete() {
+		sidx = Int32{S: cache.z3.FreshConst(fmt.Sprintf("addr(%x)", idx.C), cache.sortInt32).(z3.BV)}
+		solv.Assert(sidx.S.Eq(a.ctx.FromInt(int64(idx.C), cache.sortInt32).(z3.BV)))
+	} else {
+		solv.Assert(sidx.S.SGE(a.ctx.FromInt(0, cache.sortInt32).(z3.BV)))
+		solv.Assert(sidx.S.SLT(a.ctx.FromInt(int64(a.length), cache.sortInt32).(z3.BV)))
+	}
+	return Int32{S: a.mem.Select(sidx.S).(z3.BV)}
+}
+
+func (a *ArrayInt32) Write(idx, val Int32, solv *z3.Solver) {
+	cache := getCache(a.ctx)
+	sidx := idx
+	if idx.IsConcrete() {
+		sidx = Int32{S: cache.z3.FreshConst(fmt.Sprintf("addr(%x)", idx.C), cache.sortInt32).(z3.BV)}
+		solv.Assert(sidx.S.Eq(a.ctx.FromInt(int64(idx.C), cache.sortInt32).(z3.BV)))
+	} else {
+		solv.Assert(sidx.S.SGE(a.ctx.FromInt(0, cache.sortInt32).(z3.BV)))
+		solv.Assert(sidx.S.SLT(a.ctx.FromInt(int64(a.length), cache.sortInt32).(z3.BV)))
+	}
+	sval := val
+	if val.IsConcrete() {
+		sval = Int32{S: cache.z3.FreshConst(fmt.Sprintf("val(%x)", idx.C), cache.sortInt32).(z3.BV)}
+		solv.Assert(sval.S.Eq(a.ctx.FromInt(int64(val.C), cache.sortInt32).(z3.BV)))
+	}
+	a.mem = a.mem.Store(sidx.S, sval.S)
+}
