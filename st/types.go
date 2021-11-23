@@ -4574,6 +4574,9 @@ func (a *ArrayInt32) Read(idx Uint32, solv *z3.Solver) (Int32, bool) {
 	cache := getCache(a.ctx)
 	sidx := idx
 	if idx.IsConcrete() {
+		if int64(idx.C) < a.base || int64(idx.C) >= a.base+a.length {
+			return Int32{}, false
+		}
 		sidx = Uint32{S: cache.z3.FreshConst(fmt.Sprintf("addr(%x)", idx.C), cache.sortUint32).(z3.BV)}
 		solv.Assert(sidx.S.Eq(a.ctx.FromInt(int64(idx.C), cache.sortUint32).(z3.BV)))
 	}
@@ -4596,6 +4599,9 @@ func (a *ArrayInt32) Write(idx Uint32, val Int32, solv *z3.Solver) bool {
 	cache := getCache(a.ctx)
 	sidx := idx
 	if idx.IsConcrete() {
+		if int64(idx.C) < a.base || int64(idx.C) >= a.base+a.length {
+			return false
+		}
 		sidx = Uint32{S: cache.z3.FreshConst(fmt.Sprintf("addr(%x)", idx.C), cache.sortUint32).(z3.BV)}
 		solv.Assert(sidx.S.Eq(a.ctx.FromInt(int64(idx.C), cache.sortUint32).(z3.BV)))
 	}
